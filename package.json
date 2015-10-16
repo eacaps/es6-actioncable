@@ -2,12 +2,9 @@
   "name": "es6-actioncable",
   "version": "0.0.1",
   "description": "Port of rails actioncable coffeescript to es6",
-  "main": "dist/actioncable-bundle.js",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "scripts": {
-    "build": "browserify -d -t babelify -o dist/actioncable-bundle.js src/actioncable/Cable.js"
+    "build": "babel -d dist/ src/"
   },
   "repository": {
     "type": "git",
@@ -25,7 +22,6 @@
   },
   "homepage": "https://github.com/eacaps/es6-actioncable",
   "devDependencies": {
-    "babelify": "^6.3.0",
-    "browserify": "^11.2.0"
+    "babel": "^5.8.23"
   }
 }
