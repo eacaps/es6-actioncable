@@ -40,10 +40,9 @@ MyChannel.js
       constructor() {
       }
       subscribe() {
-        let _this = this;
-        this.subscription = ForumWebSocket.getConsumer().subscriptions.create("MyChannel", {
+        this.subscription = WebSocket.getConsumer().subscriptions.create("MyChannel", {
           connected: function () {
-            console.log('connected to linkssubscription');
+            console.log('connected to mychannel');
           },
           received: function (data) {
             //do stuff with data
