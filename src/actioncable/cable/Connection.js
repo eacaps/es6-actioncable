@@ -1,4 +1,5 @@
 //# Encapsulate the cable connection held by the consumer. This is an internal class not intended for direct user manipulation.
+import ActionCable from '../Logger';
 
 var slice = [].slice;
 var indexOf = [].indexOf;

@@ -2,7 +2,7 @@
 # Responsible for ensuring the cable connection is in good health by validating the heartbeat pings sent from the server, and attempting
 # revival reconnections if things go astray. Internal class, not intended for direct user manipulation.
 */
-import Cable from '../Cable';
+import ActionCable from '../Logger';
 
 var now = () => {
   return new Date().getTime();

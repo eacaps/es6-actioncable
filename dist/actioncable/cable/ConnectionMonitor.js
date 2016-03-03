@@ -10,9 +10,9 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
 
 
-var _Cable = require("../Cable");
+var _Logger = require("../Logger");
 
-var _Cable2 = _interopRequireDefault(_Cable);
+var _Logger2 = _interopRequireDefault(_Logger);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -50,13 +50,13 @@ var ConnectionMonitor = function () {
       this.reset();
       this.pingedAt = now();
       delete this.disconnectedAt;
-      return ActionCable.log("ConnectionMonitor connected");
+      return _Logger2.default.log("ConnectionMonitor connected");
     }
   }, {
     key: "disconnected",
     value: function disconnected() {
       this.disconnectedAt = now();
-      return ActionCable.log("ConnectionMonitor disconnected");
+      return _Logger2.default.log("ConnectionMonitor disconnected");
     }
   }, {
     key: "ping",
@@ -77,14 +77,14 @@ var ConnectionMonitor = function () {
       this.startedAt = now();
       this.poll();
       document.addEventListener("visibilitychange", this.visibilityDidChange);
-      return ActionCable.log("ConnectionMonitor started, pollInterval is " + this.getInterval() + "ms");
+      return _Logger2.default.log("ConnectionMonitor started, pollInterval is " + this.getInterval() + "ms");
     }
   }, {
     key: "stop",
     value: function stop() {
       this.stoppedAt = now();
       document.removeEventListener("visibilitychange", this.visibilityDidChange);
-      return ActionCable.log("ConnectionMonitor stopped");
+      return _Logger2.default.log("ConnectionMonitor stopped");
     }
   }, {
     key: "poll",
@@ -110,12 +110,12 @@ var ConnectionMonitor = function () {
     key: "reconnectIfStale",
     value: function reconnectIfStale() {
       if (this.connectionIsStale()) {
-        ActionCable.log("ConnectionMonitor detected stale connection, reconnectAttempts = " + this.reconnectAttempts);
+        _Logger2.default.log("ConnectionMonitor detected stale connection, reconnectAttempts = " + this.reconnectAttempts);
         this.reconnectAttempts++;
         if (this.disconnectedRecently()) {
-          return ActionCable.log("ConnectionMonitor skipping reopen because recently disconnected at " + this.disconnectedAt);
+          return _Logger2.default.log("ConnectionMonitor skipping reopen because recently disconnected at " + this.disconnectedAt);
         } else {
-          ActionCable.log("ConnectionMonitor reopening");
+          _Logger2.default.log("ConnectionMonitor reopening");
           return this.consumer.connection.reopen();
         }
       }
@@ -138,7 +138,7 @@ var ConnectionMonitor = function () {
         return setTimeout(function (_this) {
           return function () {
             if (_this.connectionIsStale() || !_this.consumer.connection.isOpen()) {
-              ActionCable.log("ConnectionMonitor reopening stale connection after visibilitychange to " + document.visibilityState);
+              _Logger2.default.log("ConnectionMonitor reopening stale connection after visibilitychange to " + document.visibilityState);
               return _this.consumer.connection.reopen();
             }
           };

@@ -4,11 +4,16 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); //# Encapsulate the cable connection held by the consumer. This is an internal class not intended for direct user manipulation.
+
+
+var _Logger = require("../Logger");
+
+var _Logger2 = _interopRequireDefault(_Logger);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-//# Encapsulate the cable connection held by the consumer. This is an internal class not intended for direct user manipulation.
 
 var slice = [].slice;
 var indexOf = [].indexOf;
@@ -38,16 +43,16 @@ var Connection = function () {
         }
       },
       open: function open() {
-        ActionCable.log("WebSocket onopen event");
+        _Logger2.default.log("WebSocket onopen event");
         this.disconnected = false;
         return this.consumer.subscriptions.reload();
       },
       close: function close() {
-        ActionCable.log("WebSocket onclose event");
+        _Logger2.default.log("WebSocket onclose event");
         return this.disconnect();
       },
       error: function error() {
-        ActionCable.log("WebSocket onerror event");
+        _Logger2.default.log("WebSocket onerror event");
         return this.disconnect();
       }
     };
@@ -68,10 +73,10 @@ var Connection = function () {
     key: "open",
     value: function open() {
       if (this.isAlive()) {
-        ActionCable.log("Attemped to open WebSocket, but existing socket is " + this.getState());
+        _Logger2.default.log("Attemped to open WebSocket, but existing socket is " + this.getState());
         throw new Error("Existing connection must be closed before opening");
       } else {
-        ActionCable.log("Opening WebSocket, current state is " + this.getState());
+        _Logger2.default.log("Opening WebSocket, current state is " + this.getState());
         if (this.webSocket != null) {
           this.uninstallEventHandlers();
         }
@@ -89,14 +94,14 @@ var Connection = function () {
   }, {
     key: "reopen",
     value: function reopen() {
-      ActionCable.log("Reopening WebSocket, current state is " + this.getState());
+      _Logger2.default.log("Reopening WebSocket, current state is " + this.getState());
       if (this.isAlive()) {
         try {
           return this.close();
         } catch (error) {
-          return ActionCable.log("Failed to reopen WebSocket", error);
+          return _Logger2.default.log("Failed to reopen WebSocket", error);
         } finally {
-          ActionCable.log("Reopening WebSocket in " + this.reopenDelay + "ms");
+          _Logger2.default.log("Reopening WebSocket in " + this.reopenDelay + "ms");
           setTimeout(this.open, this.constructor.reopenDelay);
         }
       } else {

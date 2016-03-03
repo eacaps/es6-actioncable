@@ -1,7 +1,5 @@
 import Consumer from './cable/Consumer';
 
-let Debugging = null;
-
 let CreateWebSocketURL = (url) => {
   if (url && !/^wss?:/i.test(url)) {
     var a = document.createElement("a");
@@ -18,17 +16,5 @@ let CreateWebSocketURL = (url) => {
 export default {
   createConsumer: (url) => {
     return new Consumer(CreateWebSocketURL(url));
-  },
-  startDebugging: () => {
-    return Debugging = true;
-  },
-  stopDebugging: () => {
-    return Debugging = null;
-  },
-  log: (...messages) => {
-    if (Debugging) {
-      messages.push(Date.now());
-      return console.log("[ActionCable]", ...messages);
-    }
   }
 };
