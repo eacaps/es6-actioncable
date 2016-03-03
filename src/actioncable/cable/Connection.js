@@ -17,34 +17,34 @@ class Connection {
     this.consumer = consumer;
     let _this = this;
     this.events = {
-      message: function(event) {
+      message: (event) => {
         var identifier, message, ref, type;
         ref = JSON.parse(event.data), identifier = ref.identifier, message = ref.message, type = ref.type;
         switch (type) {
           case MessageTypes.welcome:
-            return this.consumer.connectionMonitor.connected();
+            return _this.consumer.connectionMonitor.connected();
           case MessageTypes.ping:
-            return this.consumer.connectionMonitor.ping();
+            return _this.consumer.connectionMonitor.ping();
           case MessageTypes.confirmation:
-            return this.consumer.subscriptions.notify(identifier, "connected");
+            return _this.consumer.subscriptions.notify(identifier, "connected");
           case MessageTypes.rejection:
-            return this.consumer.subscriptions.reject(identifier);
+            return _this.consumer.subscriptions.reject(identifier);
           default:
-            return this.consumer.subscriptions.notify(identifier, "received", message);
+            return _this.consumer.subscriptions.notify(identifier, "received", message);
         }
       },
-      open: function() {
+      open: () => {
         ActionCable.log("WebSocket onopen event");
-        this.disconnected = false;
-        return this.consumer.subscriptions.reload();
+        _this.disconnected = false;
+        return _this.consumer.subscriptions.reload();
       },
-      close: function() {
+      close: () => {
         ActionCable.log("WebSocket onclose event");
-        return this.disconnect();
+        return _this.disconnect();
       },
-      error: function() {
+      error: () => {
         ActionCable.log("WebSocket onerror event");
-        return this.disconnect();
+        return _this.disconnect();
       }
     }
     this.open();
@@ -88,7 +88,7 @@ class Connection {
         return ActionCable.log("Failed to reopen WebSocket", error);
       } finally {
         ActionCable.log("Reopening WebSocket in " + this.reopenDelay + "ms");
-        setTimeout(this.open, this.reopenDelay);
+        setTimeout(this.open.bind(this), this.reopenDelay);
       }
     } else {
       return this.open();
