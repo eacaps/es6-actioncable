@@ -1,147 +1,180 @@
-/*
-# Collection class for creating (and internally managing) channel subscriptions. The only method intended to be triggered by the user
-# us Cable.Subscriptions#create, and it should be called through the consumer like so:
-#
-#   @App = {}
-#   App.cable = Cable.createConsumer "ws://example.com/accounts/1"
-#   App.appearance = App.cable.subscriptions.create "AppearanceChannel"
-#
-# For more details on how you'd configure an actual channel subscription, see Cable.Subscription.
-*/
+'use strict';
 
-import Subscription from './Subscription';
-import Cable from '../Cable';
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /*
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     # Collection class for creating (and internally managing) channel subscriptions. The only method intended to be triggered by the user
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     # us Cable.Subscriptions#create, and it should be called through the consumer like so:
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     #
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     #   @App = {}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     #   App.cable = Cable.createConsumer "ws://example.com/accounts/1"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     #   App.appearance = App.cable.subscriptions.create "AppearanceChannel"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     #
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     # For more details on how you'd configure an actual channel subscription, see Cable.Subscription.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     */
+
+var _Subscription = require('./Subscription');
+
+var _Subscription2 = _interopRequireDefault(_Subscription);
+
+var _Cable = require('../Cable');
+
+var _Cable2 = _interopRequireDefault(_Cable);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var slice = [].slice;
 
-class Subscriptions {
-  constructor(consumer) {
+var Subscriptions = function () {
+  function Subscriptions(consumer) {
+    _classCallCheck(this, Subscriptions);
+
     this.consumer = consumer;
     this.subscriptions = [];
   }
 
-  create(channelName, mixin) {
-    var channel, params;
-    channel = channelName;
-    params = typeof channel === "object" ? channel : {
-      channel: channel
-    };
-    return new Subscription(this, params, mixin);
-  }
-
-  add(subscription) {
-    this.subscriptions.push(subscription);
-    this.notify(subscription, "initialized");
-    return this.sendCommand(subscription, "subscribe");
-  }
-
-  remove(subscription) {
-    this.forget(subscription);
-    if (!this.findAll(subscription.identifier).length) {
-      return this.sendCommand(subscription, "unsubscribe");
+  _createClass(Subscriptions, [{
+    key: 'create',
+    value: function create(channelName, mixin) {
+      var channel, params;
+      channel = channelName;
+      params = (typeof channel === 'undefined' ? 'undefined' : _typeof(channel)) === "object" ? channel : {
+        channel: channel
+      };
+      return new _Subscription2.default(this, params, mixin);
     }
-  }
-
-  reject(identifier) {
-    var i, len, ref, results, subscription;
-    ref = this.findAll(identifier);
-    results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
-      subscription = ref[i];
+  }, {
+    key: 'add',
+    value: function add(subscription) {
+      this.subscriptions.push(subscription);
+      this.notify(subscription, "initialized");
+      return this.sendCommand(subscription, "subscribe");
+    }
+  }, {
+    key: 'remove',
+    value: function remove(subscription) {
       this.forget(subscription);
-      results.push(this.notify(subscription, "rejected"));
+      if (!this.findAll(subscription.identifier).length) {
+        return this.sendCommand(subscription, "unsubscribe");
+      }
     }
-    return results;
-  }
-
-  forget(subscription) {
-    var s;
-    return this.subscriptions = function () {
-      var i, len, ref, results;
+  }, {
+    key: 'reject',
+    value: function reject(identifier) {
+      var i, len, ref, results, subscription;
+      ref = this.findAll(identifier);
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        subscription = ref[i];
+        this.forget(subscription);
+        results.push(this.notify(subscription, "rejected"));
+      }
+      return results;
+    }
+  }, {
+    key: 'forget',
+    value: function forget(subscription) {
+      var s;
+      return this.subscriptions = function () {
+        var i, len, ref, results;
+        ref = this.subscriptions;
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          s = ref[i];
+          if (s !== subscription) {
+            results.push(s);
+          }
+        }
+        return results;
+      }.call(this);
+    }
+  }, {
+    key: 'reload',
+    value: function reload() {
+      var i, len, ref, results, subscription;
+      ref = this.subscriptions;
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        subscription = ref[i];
+        results.push(this.sendCommand(subscription, "subscribe"));
+      }
+      return results;
+    }
+  }, {
+    key: 'findAll',
+    value: function findAll(identifier) {
+      var i, len, ref, results, s;
       ref = this.subscriptions;
       results = [];
       for (i = 0, len = ref.length; i < len; i++) {
         s = ref[i];
-        if (s !== subscription) {
+        if (s.identifier === identifier) {
           results.push(s);
         }
       }
       return results;
-    }.call(this);
-  }
-
-  reload() {
-    var i, len, ref, results, subscription;
-    ref = this.subscriptions;
-    results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
-      subscription = ref[i];
-      results.push(this.sendCommand(subscription, "subscribe"));
     }
-    return results;
-  }
-
-  findAll(identifier) {
-    var i, len, ref, results, s;
-    ref = this.subscriptions;
-    results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
-      s = ref[i];
-      if (s.identifier === identifier) {
-        results.push(s);
+  }, {
+    key: 'notifyAll',
+    value: function notifyAll() {
+      var args, callbackName, i, len, ref, results, subscription;
+      callbackName = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      ref = this.subscriptions;
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        subscription = ref[i];
+        results.push(this.notify.apply(this, [subscription, callbackName].concat(slice.call(args))));
       }
+      return results;
     }
-    return results;
-  }
-
-  notifyAll() {
-    var args, callbackName, i, len, ref, results, subscription;
-    callbackName = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-    ref = this.subscriptions;
-    results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
-      subscription = ref[i];
-      results.push(this.notify.apply(this, [subscription, callbackName].concat(slice.call(args))));
+  }, {
+    key: 'notify',
+    value: function notify() {
+      var args, callbackName, i, len, results, subscription, subscriptions;
+      subscription = arguments[0], callbackName = arguments[1], args = 3 <= arguments.length ? slice.call(arguments, 2) : [];
+      if (typeof subscription === "string") {
+        subscriptions = this.findAll(subscription);
+      } else {
+        subscriptions = [subscription];
+      }
+      results = [];
+      for (i = 0, len = subscriptions.length; i < len; i++) {
+        subscription = subscriptions[i];
+        results.push(typeof subscription[callbackName] === "function" ? subscription[callbackName].apply(subscription, args) : void 0);
+      }
+      return results;
     }
-    return results;
-  }
-
-  notify() {
-    var args, callbackName, i, len, results, subscription, subscriptions;
-    subscription = arguments[0], callbackName = arguments[1], args = 3 <= arguments.length ? slice.call(arguments, 2) : [];
-    if (typeof subscription === "string") {
-      subscriptions = this.findAll(subscription);
-    } else {
-      subscriptions = [subscription];
+  }, {
+    key: 'sendCommand',
+    value: function sendCommand(subscription, command) {
+      var identifier;
+      identifier = subscription.identifier;
+      return this.consumer.send({
+        command: command,
+        identifier: identifier
+      });
     }
-    results = [];
-    for (i = 0, len = subscriptions.length; i < len; i++) {
-      subscription = subscriptions[i];
-      results.push(typeof subscription[callbackName] === "function" ? subscription[callbackName].apply(subscription, args) : void 0);
+  }, {
+    key: 'toJSON',
+    value: function toJSON() {
+      var i, len, ref, results, subscription;
+      ref = this.subscriptions;
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        subscription = ref[i];
+        results.push(subscription.identifier);
+      }
+      return results;
     }
-    return results;
-  }
+  }]);
 
-  sendCommand(subscription, command) {
-    var identifier;
-    identifier = subscription.identifier;
-    return this.consumer.send({
-      command: command,
-      identifier: identifier
-    });
-  }
+  return Subscriptions;
+}();
 
-  toJSON() {
-    var i, len, ref, results, subscription;
-    ref = this.subscriptions;
-    results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
-      subscription = ref[i];
-      results.push(subscription.identifier);
-    }
-    return results;
-  }
-
-}
-
-export default Subscriptions;
+exports.default = Subscriptions;

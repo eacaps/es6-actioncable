@@ -1,3 +1,13 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 /*
 # A new subscription is created through the Cable.Subscriptions instance available on the consumer. 
 # It provides a number of callbacks and a method for calling remote procedure calls on the corresponding 
@@ -46,7 +56,7 @@
 # The AppearanceChannel#appear/away public methods are exposed automatically to client-side invocation through the @perform method.
 */
 
-var extend = (object, properties) => {
+var extend = function extend(object, properties) {
   var key, value;
   if (properties != null) {
     for (key in properties) {
@@ -57,8 +67,10 @@ var extend = (object, properties) => {
   return object;
 };
 
-class Subscription {
-  constructor(subscriptions, params, mixin) {
+var Subscription = function () {
+  function Subscription(subscriptions, params, mixin) {
+    _classCallCheck(this, Subscription);
+
     this.subscriptions = subscriptions;
     if (params == null) {
       params = {};
@@ -69,25 +81,32 @@ class Subscription {
     this.subscriptions.add(this);
   }
 
-  perform(action, data) {
-    if (data == null) {
-      data = {};
+  _createClass(Subscription, [{
+    key: "perform",
+    value: function perform(action, data) {
+      if (data == null) {
+        data = {};
+      }
+      data.action = action;
+      return this.send(data);
     }
-    data.action = action;
-    return this.send(data);
-  }
+  }, {
+    key: "send",
+    value: function send(data) {
+      return this.consumer.send({
+        command: "message",
+        identifier: this.identifier,
+        data: JSON.stringify(data)
+      });
+    }
+  }, {
+    key: "unsubscribe",
+    value: function unsubscribe() {
+      return this.subscriptions.remove(this);
+    }
+  }]);
 
-  send(data) {
-    return this.consumer.send({
-      command: "message",
-      identifier: this.identifier,
-      data: JSON.stringify(data)
-    });
-  }
+  return Subscription;
+}();
 
-  unsubscribe() {
-    return this.subscriptions.remove(this);
-  }
-}
-
-export default Subscription;
+exports.default = Subscription;
