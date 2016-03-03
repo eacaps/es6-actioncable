@@ -32,29 +32,31 @@ class Subscriptions {
   add(subscription) {
     this.subscriptions.push(subscription);
     this.notify(subscription, "initialized");
-    if (this.sendCommand(subscription, "subscribe")) {
-      return this.notify(subscription, "connected");
+    return this.sendCommand(subscription, "subscribe");
+  }
+
+  remove(subscription) {
+    this.forget(subscription);
+    if (!this.findAll(subscription.identifier).length) {
+      return this.sendCommand(subscription, "unsubscribe");
     }
   }
 
-  reload() {
+  reject(identifier) {
     var i, len, ref, results, subscription;
-    ref = this.subscriptions;
+    ref = this.findAll(identifier);
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
       subscription = ref[i];
-      if (this.sendCommand(subscription, "subscribe")) {
-        results.push(this.notify(subscription, "connected"));
-      } else {
-        results.push(void 0);
-      }
+      this.forget(subscription);
+      results.push(this.notify(subscription, "rejected"));
     }
     return results;
   }
 
-  remove(subscription) {
+  forget(subscription) {
     var s;
-    this.subscriptions = (function() {
+    return this.subscriptions = (function() {
       var i, len, ref, results;
       ref = this.subscriptions;
       results = [];
@@ -66,9 +68,17 @@ class Subscriptions {
       }
       return results;
     }).call(this);
-    if (!this.findAll(subscription.identifier).length) {
-      return this.sendCommand(subscription, "unsubscribe");
+  }
+
+  reload() {
+    var i, len, ref, results, subscription;
+    ref = this.subscriptions;
+    results = [];
+    for (i = 0, len = ref.length; i < len; i++) {
+      subscription = ref[i];
+      results.push(this.sendCommand(subscription, "subscribe"));
     }
+    return results;
   }
 
   findAll(identifier) {
@@ -115,14 +125,10 @@ class Subscriptions {
   sendCommand(subscription, command) {
     var identifier;
     identifier = subscription.identifier;
-    if (identifier === Cable.PING_IDENTIFIER) {
-      return this.consumer.connection.isOpen();
-    } else {
-      return this.consumer.send({
-        command: command,
-        identifier: identifier
-      });
-    }
+    return this.consumer.send({
+      command: command,
+      identifier: identifier
+    });
   }
 
   toJSON() {

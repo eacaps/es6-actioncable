@@ -27,9 +27,6 @@ class Consumer {
   send(data) {
     return this.connection.send(data);
   }
-  inspect() {
-    JSON.stringify(this, null, 2);
-  }
   toJSON() {
     return {
       url: this.url,

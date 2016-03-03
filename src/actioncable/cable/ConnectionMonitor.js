@@ -20,46 +20,54 @@ class ConnectionMonitor {
 
   constructor(consumer) {
     this.pollInterval = {
-      min: 2,
+      min: 3,
       max: 30
     };
-    this.staleThreshold = {
-      startedAt: 4,
-      pingedAt: 8
-    };
-    this.identifier = Cable.PING_IDENTIFIER;
+    this.staleThreshold = 6;
     this.consumer = consumer;
-    this.consumer.subscriptions.add(this);
+    this.visibilityDidChange = this._visibilityDidChange.bind(this);
     this.start();
   }
 
   connected() {
     this.reset();
-    return this.pingedAt = now();
+    this.pingedAt = now();
+    delete this.disconnectedAt;
+    return ActionCable.log("ConnectionMonitor connected");
   }
 
-  received() {
+  disconnected() {
+    this.disconnectedAt = now();
+    return ActionCable.log("ConnectionMonitor disconnected");
+  }
+
+  ping() {
     return this.pingedAt = now();
   }
 
   reset() {
-    return this.reconnectAttempts = 0;
+    this.reconnectAttempts = 0;
+    return this.consumer.connection.isOpen();
   }
 
   start() {
     this.reset();
     delete this.stoppedAt;
     this.startedAt = now();
-    return this.poll();
+    this.poll();
+    document.addEventListener("visibilitychange", this.visibilityDidChange);
+    return ActionCable.log("ConnectionMonitor started, pollInterval is " + (this.getInterval()) + "ms");
   }
 
   stop() {
-    return this.stoppedAt = now();
+    this.stoppedAt = now();
+    document.removeEventListener("visibilitychange", this.visibilityDidChange);
+    return ActionCable.log("ConnectionMonitor stopped");
   }
 
   poll() {
-    return setTimeout((function(_this) {
-      return function() {
+    return setTimeout(((_this) => {
+      return () => {
         if (!_this.stoppedAt) {
           _this.reconnectIfStale();
           return _this.poll();
@@ -70,23 +78,43 @@ class ConnectionMonitor {
 
   getInterval() {
     var interval, max, min, ref;
-    ref = this.pollInterval, min = ref.min, max = ref.max;
-    interval = 4 * Math.log(this.reconnectAttempts + 1);
+    ref = this.constructor.pollInterval, min = ref.min, max = ref.max;
+    interval = 5 * Math.log(this.reconnectAttempts + 1);
     return clamp(interval, min, max) * 1000;
   }
 
   reconnectIfStale() {
     if (this.connectionIsStale()) {
-      this.reconnectAttempts += 1;
-      return this.consumer.connection.reopen();
+      ActionCable.log("ConnectionMonitor detected stale connection, reconnectAttempts = " + this.reconnectAttempts);
+      this.reconnectAttempts++;
+      if (this.disconnectedRecently()) {
+        return ActionCable.log("ConnectionMonitor skipping reopen because recently disconnected at " + this.disconnectedAt);
+      } else {
+        ActionCable.log("ConnectionMonitor reopening");
+        return this.consumer.connection.reopen();
+      }
     }
   }
 
   connectionIsStale() {
-    if (this.pingedAt) {
-      return secondsSince(this.pingedAt) > this.staleThreshold.pingedAt;
-    } else {
-      return secondsSince(this.startedAt) > this.staleThreshold.startedAt;
+    var ref;
+    return secondsSince((ref = this.pingedAt) != null ? ref : this.startedAt) > this.staleThreshold;
+  }
+
+  disconnectedRecently() {
+    return this.disconnectedAt && secondsSince(this.disconnectedAt) < this.constructor.staleThreshold;
+  }
+
+  visibilityDidChange() {
+    if (document.visibilityState === "visible") {
+      return setTimeout(((_this) => {
+        return () => {
+          if (_this.connectionIsStale() || !_this.consumer.connection.isOpen()) {
+            ActionCable.log("ConnectionMonitor reopening stale connection after visibilitychange to " + document.visibilityState);
+            return _this.consumer.connection.reopen();
+          }
+        };
+      })(this), 200);
     }
   }
 

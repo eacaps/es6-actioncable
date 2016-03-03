@@ -1,24 +1,34 @@
-"use strict";
+import Consumer from './cable/Consumer';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+let Debugging = null;
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-var _cableConsumer = require('./cable/Consumer');
-
-var _cableConsumer2 = _interopRequireDefault(_cableConsumer);
-
-exports["default"] = {
-  PING_IDENTIFIER: "_ping",
-  createConsumer: function createConsumer(url) {
-    return new _cableConsumer2["default"](url);
-  },
-  // eac added 20150908
-  endConsumer: function endConsumer(consumer) {
-    consumer.connection.close();
-    consumer.connectionMonitor.stop();
+let CreateWebSocketURL = url => {
+  if (url && !/^wss?:/i.test(url)) {
+    var a = document.createElement("a");
+    a.href = url;
+    // Fix populating Location properties in IE. Otherwise, protocol will be blank.
+    a.href = a.href;
+    a.protocol = a.protocol.replace("http", "ws");
+    return a.href;
+  } else {
+    return url;
   }
 };
-module.exports = exports["default"];
+
+export default {
+  createConsumer: url => {
+    return new Consumer(CreateWebSocketURL(url));
+  },
+  startDebugging: () => {
+    return Debugging = true;
+  },
+  stopDebugging: () => {
+    return Debugging = null;
+  },
+  log: (...messages) => {
+    if (Debugging) {
+      messages.push(Date.now());
+      return console.log("[ActionCable]", ...messages);
+    }
+  }
+};

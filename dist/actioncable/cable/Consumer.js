@@ -12,68 +12,29 @@
 #
 # For more details on how you'd configure an actual channel subscription, see Cable.Subscription.
 */
-'use strict';
+import Subscription from './Subscription';
+import Subscriptions from './Subscriptions';
+import Connection from './Connection';
+import ConnectionMonitor from './ConnectionMonitor';
 
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-var _Subscription = require('./Subscription');
-
-var _Subscription2 = _interopRequireDefault(_Subscription);
-
-var _Subscriptions = require('./Subscriptions');
-
-var _Subscriptions2 = _interopRequireDefault(_Subscriptions);
-
-var _Connection = require('./Connection');
-
-var _Connection2 = _interopRequireDefault(_Connection);
-
-var _ConnectionMonitor = require('./ConnectionMonitor');
-
-var _ConnectionMonitor2 = _interopRequireDefault(_ConnectionMonitor);
-
-var Consumer = (function () {
-  function Consumer(url) {
-    _classCallCheck(this, Consumer);
-
+class Consumer {
+  constructor(url) {
     this.url = url;
-    this.subscriptions = new _Subscriptions2['default'](this);
-    this.connection = new _Connection2['default'](this);
-    this.connectionMonitor = new _ConnectionMonitor2['default'](this);
+    this.subscriptions = new Subscriptions(this);
+    this.connection = new Connection(this);
+    this.connectionMonitor = new ConnectionMonitor(this);
   }
+  send(data) {
+    return this.connection.send(data);
+  }
+  toJSON() {
+    return {
+      url: this.url,
+      subscriptions: this.subscriptions,
+      connection: this.connection,
+      connectionMonitor: this.connectionMonitor
+    };
+  }
+}
 
-  _createClass(Consumer, [{
-    key: 'send',
-    value: function send(data) {
-      return this.connection.send(data);
-    }
-  }, {
-    key: 'inspect',
-    value: function inspect() {
-      JSON.stringify(this, null, 2);
-    }
-  }, {
-    key: 'toJSON',
-    value: function toJSON() {
-      return {
-        url: this.url,
-        subscriptions: this.subscriptions,
-        connection: this.connection,
-        connectionMonitor: this.connectionMonitor
-      };
-    }
-  }]);
-
-  return Consumer;
-})();
-
-exports['default'] = Consumer;
-module.exports = exports['default'];
+export default Consumer;

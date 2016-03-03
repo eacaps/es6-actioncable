@@ -4,7 +4,7 @@
   "description": "Port of rails actioncable coffeescript to es6",
   "main": "index.js",
   "scripts": {
-    "build": "babel -d dist/ src/"
+    "build": "babel src -d dist"
   },
   "repository": {
     "type": "git",
@@ -22,6 +22,6 @@
   },
   "homepage": "https://github.com/eacaps/es6-actioncable",
   "devDependencies": {
-    "babel": "^5.8.23"
+    "babel-cli": "^6.6.4"
   }
 }
