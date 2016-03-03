@@ -17,6 +17,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      # For more details on how you'd configure an actual channel subscription, see Cable.Subscription.
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
 
+
 var _Subscription = require('./Subscription');
 
 var _Subscription2 = _interopRequireDefault(_Subscription);

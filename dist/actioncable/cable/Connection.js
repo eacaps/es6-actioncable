@@ -162,8 +162,8 @@ var Connection = function () {
       }
     }
   }, {
-    key: 'disconnet',
-    value: function disconnet() {
+    key: 'disconnect',
+    value: function disconnect() {
       if (this.disconnected) {
         return;
       }

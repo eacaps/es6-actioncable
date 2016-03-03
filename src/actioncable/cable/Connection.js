@@ -135,7 +135,7 @@ class Connection {
     }
   };
 
-  disconnet() {
+  disconnect() {
     if (this.disconnected) {
       return;
     }
