@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -7,7 +7,7 @@ Object.defineProperty(exports, "__esModule", {
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); //# Encapsulate the cable connection held by the consumer. This is an internal class not intended for direct user manipulation.
 
 
-var _Logger = require("../Logger");
+var _Logger = require('../Logger');
 
 var _Logger2 = _interopRequireDefault(_Logger);
 
@@ -17,6 +17,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var slice = [].slice;
 var indexOf = [].indexOf;
+
+var MessageTypes = {
+  welcome: 'welcome',
+  ping: 'ping',
+  confirmation: 'confirm_subscription',
+  rejection: 'reject_subscription'
+};
 
 var Connection = function () {
   function Connection(consumer) {
@@ -30,13 +37,13 @@ var Connection = function () {
         var identifier, message, ref, type;
         ref = JSON.parse(event.data), identifier = ref.identifier, message = ref.message, type = ref.type;
         switch (type) {
-          case message_types.welcome:
+          case MessageTypes.welcome:
             return this.consumer.connectionMonitor.connected();
-          case message_types.ping:
+          case MessageTypes.ping:
             return this.consumer.connectionMonitor.ping();
-          case message_types.confirmation:
+          case MessageTypes.confirmation:
             return this.consumer.subscriptions.notify(identifier, "connected");
-          case message_types.rejection:
+          case MessageTypes.rejection:
             return this.consumer.subscriptions.reject(identifier);
           default:
             return this.consumer.subscriptions.notify(identifier, "received", message);
@@ -60,7 +67,7 @@ var Connection = function () {
   }
 
   _createClass(Connection, [{
-    key: "send",
+    key: 'send',
     value: function send(data) {
       if (this.isOpen()) {
         this.webSocket.send(JSON.stringify(data));
@@ -70,7 +77,7 @@ var Connection = function () {
       }
     }
   }, {
-    key: "open",
+    key: 'open',
     value: function open() {
       if (this.isAlive()) {
         _Logger2.default.log("Attemped to open WebSocket, but existing socket is " + this.getState());
@@ -86,13 +93,13 @@ var Connection = function () {
       }
     }
   }, {
-    key: "close",
+    key: 'close',
     value: function close() {
       var ref;
       return (ref = this.webSocket) != null ? ref.close() : void 0;
     }
   }, {
-    key: "reopen",
+    key: 'reopen',
     value: function reopen() {
       _Logger2.default.log("Reopening WebSocket, current state is " + this.getState());
       if (this.isAlive()) {
@@ -102,31 +109,31 @@ var Connection = function () {
           return _Logger2.default.log("Failed to reopen WebSocket", error);
         } finally {
           _Logger2.default.log("Reopening WebSocket in " + this.reopenDelay + "ms");
-          setTimeout(this.open, this.constructor.reopenDelay);
+          setTimeout(this.open, this.reopenDelay);
         }
       } else {
         return this.open();
       }
     }
   }, {
-    key: "isOpen",
+    key: 'isOpen',
     value: function isOpen() {
       return this.isState("open");
     }
   }, {
-    key: "isAlive",
+    key: 'isAlive',
     value: function isAlive() {
       return this.webSocket != null && !this.isState("closing", "closed");
     }
   }, {
-    key: "isState",
+    key: 'isState',
     value: function isState() {
       var ref, states;
       states = 1 <= arguments.length ? slice.call(arguments, 0) : [];
       return ref = this.getState(), indexOf.call(states, ref) >= 0;
     }
   }, {
-    key: "getState",
+    key: 'getState',
     value: function getState() {
       var ref, state, value;
       for (state in WebSocket) {
@@ -138,7 +145,7 @@ var Connection = function () {
       return null;
     }
   }, {
-    key: "installEventHandlers",
+    key: 'installEventHandlers',
     value: function installEventHandlers() {
       var eventName, handler;
       for (eventName in this.events) {
@@ -147,7 +154,7 @@ var Connection = function () {
       }
     }
   }, {
-    key: "uninstallEventHandlers",
+    key: 'uninstallEventHandlers',
     value: function uninstallEventHandlers() {
       var eventName;
       for (eventName in this.events) {
@@ -155,7 +162,7 @@ var Connection = function () {
       }
     }
   }, {
-    key: "disconnet",
+    key: 'disconnet',
     value: function disconnet() {
       if (this.disconnected) {
         return;
@@ -165,7 +172,7 @@ var Connection = function () {
       return this.consumer.subscriptions.notifyAll("disconnected");
     }
   }, {
-    key: "toJSON",
+    key: 'toJSON',
     value: function toJSON() {
       return {
         state: this.getState()

@@ -102,7 +102,7 @@ var ConnectionMonitor = function () {
     key: "getInterval",
     value: function getInterval() {
       var interval, max, min, ref;
-      ref = this.constructor.pollInterval, min = ref.min, max = ref.max;
+      ref = this.pollInterval, min = ref.min, max = ref.max;
       interval = 5 * Math.log(this.reconnectAttempts + 1);
       return clamp(interval, min, max) * 1000;
     }
@@ -129,7 +129,7 @@ var ConnectionMonitor = function () {
   }, {
     key: "disconnectedRecently",
     value: function disconnectedRecently() {
-      return this.disconnectedAt && secondsSince(this.disconnectedAt) < this.constructor.staleThreshold;
+      return this.disconnectedAt && secondsSince(this.disconnectedAt) < this.staleThreshold;
     }
   }, {
     key: "_visibilityDidChange",

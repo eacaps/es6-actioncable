@@ -1,8 +1,15 @@
 //# Encapsulate the cable connection held by the consumer. This is an internal class not intended for direct user manipulation.
 import ActionCable from '../Logger';
 
-var slice = [].slice;
-var indexOf = [].indexOf;
+let slice = [].slice;
+let indexOf = [].indexOf;
+
+let MessageTypes = {
+  welcome: 'welcome',
+  ping: 'ping',
+  confirmation: 'confirm_subscription',
+  rejection: 'reject_subscription'
+}
 
 class Connection {
   constructor(consumer) {
@@ -14,13 +21,13 @@ class Connection {
         var identifier, message, ref, type;
         ref = JSON.parse(event.data), identifier = ref.identifier, message = ref.message, type = ref.type;
         switch (type) {
-          case message_types.welcome:
+          case MessageTypes.welcome:
             return this.consumer.connectionMonitor.connected();
-          case message_types.ping:
+          case MessageTypes.ping:
             return this.consumer.connectionMonitor.ping();
-          case message_types.confirmation:
+          case MessageTypes.confirmation:
             return this.consumer.subscriptions.notify(identifier, "connected");
-          case message_types.rejection:
+          case MessageTypes.rejection:
             return this.consumer.subscriptions.reject(identifier);
           default:
             return this.consumer.subscriptions.notify(identifier, "received", message);
@@ -81,7 +88,7 @@ class Connection {
         return ActionCable.log("Failed to reopen WebSocket", error);
       } finally {
         ActionCable.log("Reopening WebSocket in " + this.reopenDelay + "ms");
-        setTimeout(this.open, this.constructor.reopenDelay);
+        setTimeout(this.open, this.reopenDelay);
       }
     } else {
       return this.open();

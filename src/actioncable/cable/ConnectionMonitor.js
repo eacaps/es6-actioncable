@@ -78,7 +78,7 @@ class ConnectionMonitor {
 
   getInterval() {
     var interval, max, min, ref;
-    ref = this.constructor.pollInterval, min = ref.min, max = ref.max;
+    ref = this.pollInterval, min = ref.min, max = ref.max;
     interval = 5 * Math.log(this.reconnectAttempts + 1);
     return clamp(interval, min, max) * 1000;
   }
@@ -102,7 +102,7 @@ class ConnectionMonitor {
   }
 
   disconnectedRecently() {
-    return this.disconnectedAt && secondsSince(this.disconnectedAt) < this.constructor.staleThreshold;
+    return this.disconnectedAt && secondsSince(this.disconnectedAt) < this.staleThreshold;
   }
 
   _visibilityDidChange() {
