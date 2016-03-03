@@ -105,7 +105,7 @@ class ConnectionMonitor {
     return this.disconnectedAt && secondsSince(this.disconnectedAt) < this.constructor.staleThreshold;
   }
 
-  visibilityDidChange() {
+  _visibilityDidChange() {
     if (document.visibilityState === "visible") {
       return setTimeout(((_this) => {
         return () => {

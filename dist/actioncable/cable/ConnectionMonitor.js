@@ -132,8 +132,8 @@ var ConnectionMonitor = function () {
       return this.disconnectedAt && secondsSince(this.disconnectedAt) < this.constructor.staleThreshold;
     }
   }, {
-    key: "visibilityDidChange",
-    value: function visibilityDidChange() {
+    key: "_visibilityDidChange",
+    value: function _visibilityDidChange() {
       if (document.visibilityState === "visible") {
         return setTimeout(function (_this) {
           return function () {
