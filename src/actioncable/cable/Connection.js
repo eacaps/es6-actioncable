@@ -30,6 +30,9 @@ class Connection {
           case MessageTypes.rejection:
             return _this.consumer.subscriptions.reject(identifier);
           default:
+            if (identifier === MessageTypes.ping) {
+              return _this.consumer.connectionMonitor.ping();
+            }
             return _this.consumer.subscriptions.notify(identifier, "received", message);
         }
       },
