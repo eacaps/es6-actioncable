@@ -90,7 +90,7 @@ var Connection = (function () {
     value: function isState() {
       var ref, states;
       states = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-      return (ref = this.getState(), indexOf.call(states, ref) >= 0);
+      return ref = this.getState(), indexOf.call(states, ref) >= 0;
     }
   }, {
     key: "getState",
@@ -143,7 +143,7 @@ var Connection = (function () {
       var eventName, results;
       results = [];
       for (eventName in this.events) {
-        results.push(this.webSocket.removeEventListener(eventName));
+        results.push(this.webSocket.removeEventListener(eventName, this.events[eventName]));
       }
       return results;
     }
