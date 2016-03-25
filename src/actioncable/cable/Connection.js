@@ -3,14 +3,20 @@
 var slice = [].slice;
 var indexOf = [].indexOf;
 
+const isNode = (typeof process !== 'undefined') && (process.release.name === 'node');
+if (isNode) {
+  var WebSocket = require('websocket').w3cwebsocket;
+}
+
 class Connection {
   constructor(consumer) {
     this.consumer = consumer;
     let _this = this;
     this.events = {
       message: function(event) {
-        var identifier, message, ref;
-        ref = JSON.parse(event.data), identifier = ref.identifier, message = ref.message;
+        var identifier, message, ref, type;
+        ref = JSON.parse(event.data), identifier = ref.identifier, message = ref.message, type = ref.type;
+        if (['confirm_subscription', 'reject_subscription'].indexOf(type) >= 0) { return; }
         return _this.consumer.subscriptions.notify(identifier, "received", message);
       },
       open: function() {
@@ -40,7 +46,13 @@ class Connection {
     if (this.isState("open", "connecting")) {
       return;
     }
-    this.webSocket = new WebSocket(this.consumer.url);
+    this.webSocket = new WebSocket(
+      this.consumer.url,
+      this.consumer.protocols,
+      this.consumer.origin,
+      this.consumer.headers,
+      this.consumer.extraRequestOptions
+    );
     return this.installEventHandlers();
   }
 
@@ -76,13 +88,10 @@ class Connection {
 
   getState() {
     var ref, state, value;
-    for (state in WebSocket) {
-      value = WebSocket[state];
-      if (value === ((ref = this.webSocket) != null ? ref.readyState : void 0)) {
-        return state.toLowerCase();
-      }
+    var states = ['connecting','open','closing','closed'];
+    if (this.webSocket) {
+      return states[this.webSocket.readyState];
     }
-    return null;
   }
 
   closeSilently(callback) {

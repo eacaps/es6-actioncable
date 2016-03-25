@@ -12,8 +12,8 @@ var _cableConsumer2 = _interopRequireDefault(_cableConsumer);
 
 exports["default"] = {
   PING_IDENTIFIER: "_ping",
-  createConsumer: function createConsumer(url) {
-    return new _cableConsumer2["default"](url);
+  createConsumer: function createConsumer(url, options) {
+    return new _cableConsumer2["default"](url, options);
   },
   // eac added 20150908
   endConsumer: function endConsumer(consumer) {
