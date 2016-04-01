@@ -13,11 +13,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var slice = [].slice;
 var indexOf = [].indexOf;
 
-var isNode = typeof process !== 'undefined' && process.release.name === 'node';
-if (isNode) {
-  var WebSocket = require('websocket').w3cwebsocket;
-}
-
 var Connection = (function () {
   function Connection(consumer) {
     _classCallCheck(this, Connection);
@@ -63,7 +58,11 @@ var Connection = (function () {
       if (this.isState("open", "connecting")) {
         return;
       }
-      this.webSocket = new WebSocket(this.consumer.url, this.consumer.protocols, this.consumer.origin, this.consumer.headers, this.consumer.extraRequestOptions);
+      if (this.consumer.options.createWebsocket) {
+        this.webSocket = this.consumer.options.createWebsocket();
+      } else {
+        this.webSocket = new WebSocket(this.consumer.url);
+      }
       return this.installEventHandlers();
     }
   }, {

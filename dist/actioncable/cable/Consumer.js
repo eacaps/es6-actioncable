@@ -45,15 +45,10 @@ var Consumer = (function () {
     _classCallCheck(this, Consumer);
 
     this.url = url;
-
     if (!options) {
       options = {};
     }
-    this.url = url;
-    this.protocols = options.protocols;
-    this.origin = options.origin;
-    this.headers = options.headers;
-    this.extraRequestOptions = options.extraRequestOptions;
+    this.options = options;
 
     this.subscriptions = new _Subscriptions2['default'](this);
     this.connection = new _Connection2['default'](this);
