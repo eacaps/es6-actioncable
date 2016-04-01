@@ -65,5 +65,14 @@ Actioncable is good stuff, even if it is in Ruby.
 * You will need to pass the origin to the WebSocket library as Rails will by default reject requests with an invalid origin.  See example below:
 
 ```javascript
-const consumer = Cable.createConsumer('ws://0.0.0.0:3000/cable', { origin: 'http://0.0.0.0:3000' });
+const consumer = Cable.createConsumer('ws://0.0.0.0:3000/cable', { createWebsocket: () => {
+  var WebSocketLib = require('websocket').w3cwebsocket;
+  this.webSocket = new WebSocket(
+     'ws://0.0.0.0:3000/cable',
+     protocols,
+     'http://0.0.0.0:3000',
+     headers,
+     extraRequestOptions
+   );
+} });
 ```
