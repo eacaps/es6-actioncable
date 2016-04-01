@@ -66,13 +66,14 @@ Actioncable is good stuff, even if it is in Ruby.
 
 ```javascript
 const consumer = Cable.createConsumer('ws://0.0.0.0:3000/cable', { createWebsocket: () => {
-  var WebSocketLib = require('websocket').w3cwebsocket;
-  this.webSocket = new WebSocket(
+  var w3cwebsocket = require('websocket').w3cwebsocket;
+  let webSocket = new w3cwebsocket(
      'ws://0.0.0.0:3000/cable',
      protocols,
      'http://0.0.0.0:3000',
      headers,
      extraRequestOptions
    );
+   return webSocket;
 } });
 ```
