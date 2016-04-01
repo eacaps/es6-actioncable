@@ -20,13 +20,8 @@ import ConnectionMonitor from './ConnectionMonitor';
 class Consumer {
   constructor(url, options) {
     this.url = url;
-
     if (!options) { options = {}; }
-    this.url = url;
-    this.protocols = options.protocols;
-    this.origin = options.origin;
-    this.headers = options.headers;
-    this.extraRequestOptions = options.extraRequestOptions;
+    this.options = options;
 
     this.subscriptions = new Subscriptions(this);
     this.connection = new Connection(this);

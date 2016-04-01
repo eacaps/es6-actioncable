@@ -3,11 +3,6 @@
 var slice = [].slice;
 var indexOf = [].indexOf;
 
-const isNode = (typeof process !== 'undefined') && (process.release.name === 'node');
-if (isNode) {
-  var WebSocket = require('websocket').w3cwebsocket;
-}
-
 class Connection {
   constructor(consumer) {
     this.consumer = consumer;
@@ -46,13 +41,11 @@ class Connection {
     if (this.isState("open", "connecting")) {
       return;
     }
-    this.webSocket = new WebSocket(
-      this.consumer.url,
-      this.consumer.protocols,
-      this.consumer.origin,
-      this.consumer.headers,
-      this.consumer.extraRequestOptions
-    );
+    if(this.consumer.options.createWebsocket) {
+      this.webSocket = this.consumer.options.createWebsocket();
+    } else {
+      this.webSocket = new WebSocket(this.consumer.url);
+    }
     return this.installEventHandlers();
   }
 

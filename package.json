@@ -21,9 +21,6 @@
     "url": "https://github.com/eacaps/es6-actioncable/issues"
   },
   "homepage": "https://github.com/eacaps/es6-actioncable",
-  "dependencies": {
-    "websocket": "^1.0.22"
-  },
   "devDependencies": {
     "babel": "^5.8.23"
   }
