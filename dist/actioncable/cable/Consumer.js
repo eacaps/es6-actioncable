@@ -41,10 +41,15 @@ var _ConnectionMonitor = require('./ConnectionMonitor');
 var _ConnectionMonitor2 = _interopRequireDefault(_ConnectionMonitor);
 
 var Consumer = (function () {
-  function Consumer(url) {
+  function Consumer(url, options) {
     _classCallCheck(this, Consumer);
 
     this.url = url;
+    if (!options) {
+      options = {};
+    }
+    this.options = options;
+
     this.subscriptions = new _Subscriptions2['default'](this);
     this.connection = new _Connection2['default'](this);
     this.connectionMonitor = new _ConnectionMonitor2['default'](this);
