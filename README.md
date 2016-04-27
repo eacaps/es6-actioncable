@@ -61,6 +61,7 @@ Actioncable is good stuff, even if it is in Ruby.
 
 `es6-actioncable` will work under Node.js, however you will need to bear the following in mind:
 
+* You will need to supply your own websocket library, 2 out of 2 developers recommend: https://www.npmjs.com/package/websocket.
 * Your ActionCable Rails server must be bound to a specific IP or `0.0.0.0`, but not localhost. This can be done as follows `rails server -b 0.0.0.0`. See https://twitter.com/mattheworiordan/status/713350750483693568 for an explanation of the issue.
 * You will need to pass the origin to the WebSocket library as Rails will by default reject requests with an invalid origin.  See example below:
 
