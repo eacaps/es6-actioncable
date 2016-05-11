@@ -44,7 +44,6 @@ var Consumer = function () {
   function Consumer(url, options) {
     _classCallCheck(this, Consumer);
 
-    console.log('wtf');
     this.options = options ? options : {};
     this.url = url;
     this.subscriptions = new _Subscriptions2.default(this);
