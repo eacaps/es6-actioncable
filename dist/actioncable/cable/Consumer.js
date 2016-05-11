@@ -41,9 +41,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Consumer = function () {
-  function Consumer(url) {
+  function Consumer(url, options) {
     _classCallCheck(this, Consumer);
 
+    console.log('wtf');
+    this.options = options ? options : {};
     this.url = url;
     this.subscriptions = new _Subscriptions2.default(this);
     this.connection = new _Connection2.default(this);

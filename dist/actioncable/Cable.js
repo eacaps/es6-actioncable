@@ -24,7 +24,7 @@ var CreateWebSocketURL = function CreateWebSocketURL(url) {
 };
 
 exports.default = {
-  createConsumer: function createConsumer(url) {
-    return new _Consumer2.default(CreateWebSocketURL(url));
+  createConsumer: function createConsumer(url, options) {
+    return new _Consumer2.default(CreateWebSocketURL(url), options);
   }
 };

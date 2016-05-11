@@ -14,7 +14,7 @@ let CreateWebSocketURL = (url) => {
 }
 
 export default {
-  createConsumer: (url) => {
-    return new Consumer(CreateWebSocketURL(url));
+  createConsumer: (url, options) => {
+    return new Consumer(CreateWebSocketURL(url), options);
   }
 };

@@ -18,7 +18,9 @@ import Connection from './Connection';
 import ConnectionMonitor from './ConnectionMonitor';
 
 class Consumer {
-  constructor(url) {
+  constructor(url, options) {
+    console.log('wtf');
+    this.options = options ? options : {};
     this.url = url;
     this.subscriptions = new Subscriptions(this);
     this.connection = new Connection(this);

@@ -90,7 +90,12 @@ var Connection = function () {
         if (this.webSocket != null) {
           this.uninstallEventHandlers();
         }
-        this.webSocket = new WebSocket(this.consumer.url);
+        //allow people to pass in their own method to create websockets
+        if (this.consumer.options.createWebsocket) {
+          this.webSocket = this.consumer.options.createWebsocket();
+        } else {
+          this.webSocket = new WebSocket(this.consumer.url);
+        }
         this.installEventHandlers();
         return true;
       }
