@@ -16,5 +16,10 @@ let CreateWebSocketURL = (url) => {
 export default {
   createConsumer: (url, options) => {
     return new Consumer(CreateWebSocketURL(url), options);
+  },
+  endConsumer: (consumer) => {
+    consumer.connection.close();
+    consumer.connection.disconnect();
+    consumer.connectionMonitor.stop();
   }
 };

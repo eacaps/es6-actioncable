@@ -26,5 +26,10 @@ var CreateWebSocketURL = function CreateWebSocketURL(url) {
 exports.default = {
   createConsumer: function createConsumer(url, options) {
     return new _Consumer2.default(CreateWebSocketURL(url), options);
+  },
+  endConsumer: function endConsumer(consumer) {
+    consumer.connection.close();
+    consumer.connection.disconnect();
+    consumer.connectionMonitor.stop();
   }
 };

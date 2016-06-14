@@ -144,13 +144,10 @@ var Connection = function () {
     key: 'getState',
     value: function getState() {
       var ref, state, value;
-      for (state in WebSocket) {
-        value = WebSocket[state];
-        if (value === ((ref = this.webSocket) != null ? ref.readyState : void 0)) {
-          return state.toLowerCase();
-        }
+      var states = ['connecting', 'open', 'closing', 'closed'];
+      if (this.webSocket) {
+        return states[this.webSocket.readyState];
       }
-      return null;
     }
   }, {
     key: 'installEventHandlers',
