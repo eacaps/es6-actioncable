@@ -134,7 +134,9 @@ var Subscriptions = (function () {
       results = [];
       for (i = 0, len = subscriptions.length; i < len; i++) {
         subscription = subscriptions[i];
-        results.push(typeof subscription[callbackName] === "function" ? subscription[callbackName].apply(subscription, args) : void 0);
+        if (subscription) {
+          results.push(typeof subscription[callbackName] === "function" ? subscription[callbackName].apply(subscription, args) : void 0);
+        }
       }
       return results;
     }
