@@ -46,10 +46,6 @@ var Consumer = function () {
 
     this.options = options ? options : {};
     this.url = url;
-    if (!options) {
-      options = {};
-    }
-    this.options = options;
 
     this.subscriptions = new _Subscriptions2.default(this);
     this.connection = new _Connection2.default(this);

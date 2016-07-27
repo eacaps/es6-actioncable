@@ -21,8 +21,6 @@ class Consumer {
   constructor(url, options) {
     this.options = options ? options : {};
     this.url = url;
-    if (!options) { options = {}; }
-    this.options = options;
 
     this.subscriptions = new Subscriptions(this);
     this.connection = new Connection(this);
