@@ -57,14 +57,6 @@ MyChannel.js
 
 Actioncable is good stuff, even if it is in Ruby.
 
-## Adding your own headers.
-
-If you need to put data in the header, you can use `options.headers`
-
-    let headers = { Cookie: 'key=value' };
-
-    Cable.createConsumer(url, { headers: headers } );
-
 ## Connecting from Node.js
 
 `es6-actioncable` will work under Node.js, however you will need to bear the following in mind:
