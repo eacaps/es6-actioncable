@@ -1,30 +1,55 @@
 //# Encapsulate the cable connection held by the consumer. This is an internal class not intended for direct user manipulation.
+import ActionCable from '../Logger';
 
-var slice = [].slice;
-var indexOf = [].indexOf;
+let slice = [].slice;
+let indexOf = [].indexOf;
+
+let MessageTypes = {
+  welcome: 'welcome',
+  ping: 'ping',
+  confirmation: 'confirm_subscription',
+  rejection: 'reject_subscription'
+}
 
 class Connection {
   constructor(consumer) {
+    this.reopenDelay = 500;
     this.consumer = consumer;
     let _this = this;
     this.events = {
-      message: function(event) {
+      message: (event) => {
         var identifier, message, ref, type;
         ref = JSON.parse(event.data), identifier = ref.identifier, message = ref.message, type = ref.type;
-        if (['confirm_subscription', 'reject_subscription'].indexOf(type) >= 0) { return; }
-        return _this.consumer.subscriptions.notify(identifier, "received", message);
+        switch (type) {
+          case MessageTypes.welcome:
+            return _this.consumer.connectionMonitor.connected();
+          case MessageTypes.ping:
+            return _this.consumer.connectionMonitor.ping();
+          case MessageTypes.confirmation:
+            return _this.consumer.subscriptions.notify(identifier, "connected");
+          case MessageTypes.rejection:
+            return _this.consumer.subscriptions.reject(identifier);
+          default:
+            if (identifier === MessageTypes.ping) {
+              return _this.consumer.connectionMonitor.ping();
+            }
+            return _this.consumer.subscriptions.notify(identifier, "received", message);
+        }
       },
-      open: function() {
+      open: () => {
+        ActionCable.log("WebSocket onopen event");
+        _this.disconnected = false;
         return _this.consumer.subscriptions.reload();
       },
-      close: function() {
-        return _this.consumer.subscriptions.notifyAll("disconnected");
+      close: () => {
+        ActionCable.log("WebSocket onclose event");
+        return _this.disconnect();
       },
-      error: function() {
-        this.consumer.subscriptions.notifyAll("disconnected");
-        return _this.closeSilently();
+      error: () => {
+        ActionCable.log("WebSocket onerror event");
+        return _this.disconnect();
       }
-    };
+    }
     this.open();
   }
 
@@ -38,32 +63,41 @@ class Connection {
   }
 
   open() {
-    if (this.isState("open", "connecting")) {
-      return;
-    }
-    if(this.consumer.options.createWebsocket) {
-      this.webSocket = this.consumer.options.createWebsocket();
+    if (this.isAlive()) {
+      ActionCable.log("Attemped to open WebSocket, but existing socket is " + (this.getState()));
+      throw new Error("Existing connection must be closed before opening");
     } else {
-      this.webSocket = new WebSocket(this.consumer.url);
+      ActionCable.log("Opening WebSocket, current state is " + (this.getState()));
+      if (this.webSocket != null) {
+        this.uninstallEventHandlers();
+      }
+      //allow people to pass in their own method to create websockets
+      if(this.consumer.options.createWebsocket) {
+        this.webSocket = this.consumer.options.createWebsocket(this.consumer.options);
+      } else {
+        this.webSocket = new WebSocket(this.consumer.url, '', this.consumer.options.headers);
+      }
+      this.installEventHandlers();
+      return true;
     }
-    return this.installEventHandlers();
   }
 
   close() {
     var ref;
-    if (this.isState("closed", "closing")) {
-      return;
-    }
     return (ref = this.webSocket) != null ? ref.close() : void 0;
   }
 
   reopen() {
-    if (this.isOpen()) {
-      return this.closeSilently((function(_this) {
-        return function() {
-          return _this.open();
-        };
-      })(this));
+    ActionCable.log("Reopening WebSocket, current state is " + (this.getState()));
+    if (this.isAlive()) {
+      try {
+        return this.close();
+      } catch (error) {
+        return ActionCable.log("Failed to reopen WebSocket", error);
+      } finally {
+        ActionCable.log("Reopening WebSocket in " + this.reopenDelay + "ms");
+        setTimeout(this.open.bind(this), this.reopenDelay);
+      }
     } else {
       return this.open();
     }
@@ -71,6 +105,10 @@ class Connection {
 
   isOpen() {
     return this.isState("open");
+  }
+
+  isAlive() {
+    return (this.webSocket != null) && !this.isState("closing", "closed");
   }
 
   isState() {
@@ -87,50 +125,35 @@ class Connection {
     }
   }
 
-  closeSilently(callback) {
-    if (callback == null) {
-      callback = function() {};
-    }
-    this.uninstallEventHandlers();
-    this.installEventHandler("close", callback);
-    this.installEventHandler("error", callback);
-    try {
-      return this.webSocket.close();
-    } finally {
-      this.uninstallEventHandlers();
-    }
-  }
-
   installEventHandlers() {
-    var eventName, results;
-    results = [];
+    var eventName, handler;
     for (eventName in this.events) {
-      results.push(this.installEventHandler(eventName));
-    }
-    return results;
-  };
-
-  installEventHandler(eventName, handler) {
-    if (handler == null) {
       handler = this.events[eventName].bind(this);
+      this.webSocket["on" + eventName] = handler;
     }
-    return this.webSocket.addEventListener(eventName, handler);
   };
 
   uninstallEventHandlers() {
-    var eventName, results;
-    results = [];
+    var eventName;
     for (eventName in this.events) {
-      results.push(this.webSocket.removeEventListener(eventName, this.events[eventName]));
+      this.webSocket["on" + eventName] = () => {};
     }
-    return results;
   };
+
+  disconnect() {
+    if (this.disconnected) {
+      return;
+    }
+    this.disconnected = true;
+    this.consumer.connectionMonitor.disconnected();
+    return this.consumer.subscriptions.notifyAll("disconnected");
+  }
 
   toJSON() {
     return {
       state: this.getState()
     };
-  };
+  }
 }
 
 export default Connection;

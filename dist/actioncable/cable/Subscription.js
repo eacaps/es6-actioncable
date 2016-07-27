@@ -1,3 +1,13 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 /*
 # A new subscription is created through the Cable.Subscriptions instance available on the consumer. 
 # It provides a number of callbacks and a method for calling remote procedure calls on the corresponding 
@@ -46,16 +56,6 @@
 # The AppearanceChannel#appear/away public methods are exposed automatically to client-side invocation through the @perform method.
 */
 
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
 var extend = function extend(object, properties) {
   var key, value;
   if (properties != null) {
@@ -67,7 +67,7 @@ var extend = function extend(object, properties) {
   return object;
 };
 
-var Subscription = (function () {
+var Subscription = function () {
   function Subscription(subscriptions, params, mixin) {
     _classCallCheck(this, Subscription);
 
@@ -107,7 +107,6 @@ var Subscription = (function () {
   }]);
 
   return Subscription;
-})();
+}();
 
-exports["default"] = Subscription;
-module.exports = exports["default"];
+exports.default = Subscription;

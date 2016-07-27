@@ -4,21 +4,32 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+var _Consumer = require("./cable/Consumer");
 
-var _cableConsumer = require('./cable/Consumer');
+var _Consumer2 = _interopRequireDefault(_Consumer);
 
-var _cableConsumer2 = _interopRequireDefault(_cableConsumer);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports["default"] = {
-  PING_IDENTIFIER: "_ping",
+var CreateWebSocketURL = function CreateWebSocketURL(url) {
+  if (url && !/^wss?:/i.test(url)) {
+    var a = document.createElement("a");
+    a.href = url;
+    // Fix populating Location properties in IE. Otherwise, protocol will be blank.
+    a.href = a.href;
+    a.protocol = a.protocol.replace("http", "ws");
+    return a.href;
+  } else {
+    return url;
+  }
+};
+
+exports.default = {
   createConsumer: function createConsumer(url, options) {
-    return new _cableConsumer2["default"](url, options);
+    return new _Consumer2.default(CreateWebSocketURL(url), options);
   },
-  // eac added 20150908
   endConsumer: function endConsumer(consumer) {
     consumer.connection.close();
+    consumer.connection.disconnect();
     consumer.connectionMonitor.stop();
   }
 };
-module.exports = exports["default"];

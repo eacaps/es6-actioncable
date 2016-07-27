@@ -1,42 +1,69 @@
-//# Encapsulate the cable connection held by the consumer. This is an internal class not intended for direct user manipulation.
-
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); //# Encapsulate the cable connection held by the consumer. This is an internal class not intended for direct user manipulation.
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var _Logger = require('../Logger');
+
+var _Logger2 = _interopRequireDefault(_Logger);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var slice = [].slice;
 var indexOf = [].indexOf;
 
-var Connection = (function () {
+var MessageTypes = {
+  welcome: 'welcome',
+  ping: 'ping',
+  confirmation: 'confirm_subscription',
+  rejection: 'reject_subscription'
+};
+
+var Connection = function () {
   function Connection(consumer) {
     _classCallCheck(this, Connection);
 
+    this.reopenDelay = 500;
     this.consumer = consumer;
     var _this = this;
     this.events = {
       message: function message(event) {
         var identifier, message, ref, type;
         ref = JSON.parse(event.data), identifier = ref.identifier, message = ref.message, type = ref.type;
-        if (['confirm_subscription', 'reject_subscription'].indexOf(type) >= 0) {
-          return;
+        switch (type) {
+          case MessageTypes.welcome:
+            return _this.consumer.connectionMonitor.connected();
+          case MessageTypes.ping:
+            return _this.consumer.connectionMonitor.ping();
+          case MessageTypes.confirmation:
+            return _this.consumer.subscriptions.notify(identifier, "connected");
+          case MessageTypes.rejection:
+            return _this.consumer.subscriptions.reject(identifier);
+          default:
+            if (identifier === MessageTypes.ping) {
+              return _this.consumer.connectionMonitor.ping();
+            }
+            return _this.consumer.subscriptions.notify(identifier, "received", message);
         }
-        return _this.consumer.subscriptions.notify(identifier, "received", message);
       },
       open: function open() {
+        _Logger2.default.log("WebSocket onopen event");
+        _this.disconnected = false;
         return _this.consumer.subscriptions.reload();
       },
       close: function close() {
-        return _this.consumer.subscriptions.notifyAll("disconnected");
+        _Logger2.default.log("WebSocket onclose event");
+        return _this.disconnect();
       },
       error: function error() {
-        this.consumer.subscriptions.notifyAll("disconnected");
-        return _this.closeSilently();
+        _Logger2.default.log("WebSocket onerror event");
+        return _this.disconnect();
       }
     };
     this.open();
@@ -55,34 +82,43 @@ var Connection = (function () {
   }, {
     key: 'open',
     value: function open() {
-      if (this.isState("open", "connecting")) {
-        return;
-      }
-      if (this.consumer.options.createWebsocket) {
-        this.webSocket = this.consumer.options.createWebsocket();
+      if (this.isAlive()) {
+        _Logger2.default.log("Attemped to open WebSocket, but existing socket is " + this.getState());
+        throw new Error("Existing connection must be closed before opening");
       } else {
-        this.webSocket = new WebSocket(this.consumer.url);
+        _Logger2.default.log("Opening WebSocket, current state is " + this.getState());
+        if (this.webSocket != null) {
+          this.uninstallEventHandlers();
+        }
+        //allow people to pass in their own method to create websockets
+        if (this.consumer.options.createWebsocket) {
+          this.webSocket = this.consumer.options.createWebsocket(this.consumer.options);
+        } else {
+          this.webSocket = new WebSocket(this.consumer.url, '', this.consumer.options.headers);
+        }
+        this.installEventHandlers();
+        return true;
       }
-      return this.installEventHandlers();
     }
   }, {
     key: 'close',
     value: function close() {
       var ref;
-      if (this.isState("closed", "closing")) {
-        return;
-      }
       return (ref = this.webSocket) != null ? ref.close() : void 0;
     }
   }, {
     key: 'reopen',
     value: function reopen() {
-      if (this.isOpen()) {
-        return this.closeSilently((function (_this) {
-          return function () {
-            return _this.open();
-          };
-        })(this));
+      _Logger2.default.log("Reopening WebSocket, current state is " + this.getState());
+      if (this.isAlive()) {
+        try {
+          return this.close();
+        } catch (error) {
+          return _Logger2.default.log("Failed to reopen WebSocket", error);
+        } finally {
+          _Logger2.default.log("Reopening WebSocket in " + this.reopenDelay + "ms");
+          setTimeout(this.open.bind(this), this.reopenDelay);
+        }
       } else {
         return this.open();
       }
@@ -91,6 +127,11 @@ var Connection = (function () {
     key: 'isOpen',
     value: function isOpen() {
       return this.isState("open");
+    }
+  }, {
+    key: 'isAlive',
+    value: function isAlive() {
+      return this.webSocket != null && !this.isState("closing", "closed");
     }
   }, {
     key: 'isState',
@@ -109,47 +150,31 @@ var Connection = (function () {
       }
     }
   }, {
-    key: 'closeSilently',
-    value: function closeSilently(callback) {
-      if (callback == null) {
-        callback = function () {};
-      }
-      this.uninstallEventHandlers();
-      this.installEventHandler("close", callback);
-      this.installEventHandler("error", callback);
-      try {
-        return this.webSocket.close();
-      } finally {
-        this.uninstallEventHandlers();
-      }
-    }
-  }, {
     key: 'installEventHandlers',
     value: function installEventHandlers() {
-      var eventName, results;
-      results = [];
+      var eventName, handler;
       for (eventName in this.events) {
-        results.push(this.installEventHandler(eventName));
-      }
-      return results;
-    }
-  }, {
-    key: 'installEventHandler',
-    value: function installEventHandler(eventName, handler) {
-      if (handler == null) {
         handler = this.events[eventName].bind(this);
+        this.webSocket["on" + eventName] = handler;
       }
-      return this.webSocket.addEventListener(eventName, handler);
     }
   }, {
     key: 'uninstallEventHandlers',
     value: function uninstallEventHandlers() {
-      var eventName, results;
-      results = [];
+      var eventName;
       for (eventName in this.events) {
-        results.push(this.webSocket.removeEventListener(eventName, this.events[eventName]));
+        this.webSocket["on" + eventName] = function () {};
       }
-      return results;
+    }
+  }, {
+    key: 'disconnect',
+    value: function disconnect() {
+      if (this.disconnected) {
+        return;
+      }
+      this.disconnected = true;
+      this.consumer.connectionMonitor.disconnected();
+      return this.consumer.subscriptions.notifyAll("disconnected");
     }
   }, {
     key: 'toJSON',
@@ -161,7 +186,6 @@ var Connection = (function () {
   }]);
 
   return Connection;
-})();
+}();
 
-exports['default'] = Connection;
-module.exports = exports['default'];
+exports.default = Connection;

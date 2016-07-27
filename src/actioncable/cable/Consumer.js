@@ -19,6 +19,7 @@ import ConnectionMonitor from './ConnectionMonitor';
 
 class Consumer {
   constructor(url, options) {
+    this.options = options ? options : {};
     this.url = url;
     if (!options) { options = {}; }
     this.options = options;
@@ -29,9 +30,6 @@ class Consumer {
   }
   send(data) {
     return this.connection.send(data);
-  }
-  inspect() {
-    JSON.stringify(this, null, 2);
   }
   toJSON() {
     return {
