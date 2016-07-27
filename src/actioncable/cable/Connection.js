@@ -44,7 +44,7 @@ class Connection {
     if(this.consumer.options.createWebsocket) {
       this.webSocket = this.consumer.options.createWebsocket(this.consumer.options);
     } else {
-      this.webSocket = new WebSocket(this.consumer.url, '', this.consumer.options.headers);
+      this.webSocket = new WebSocket(this.consumer.url);
     }
     return this.installEventHandlers();
   }
