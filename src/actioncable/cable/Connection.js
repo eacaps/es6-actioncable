@@ -73,9 +73,9 @@ class Connection {
       }
       //allow people to pass in their own method to create websockets
       if(this.consumer.options.createWebsocket) {
-        this.webSocket = this.consumer.options.createWebsocket();
+        this.webSocket = this.consumer.options.createWebsocket(this.consumer.options);
       } else {
-        this.webSocket = new WebSocket(this.consumer.url);
+        this.webSocket = new WebSocket(this.consumer.url, '', this.consumer.options.headers);
       }
       this.installEventHandlers();
       return true;
