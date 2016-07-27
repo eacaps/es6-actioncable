@@ -46,17 +46,7 @@
 # The AppearanceChannel#appear/away public methods are exposed automatically to client-side invocation through the @perform method.
 */
 
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var extend = function extend(object, properties) {
+var extend = (object, properties) => {
   var key, value;
   if (properties != null) {
     for (key in properties) {
@@ -67,10 +57,8 @@ var extend = function extend(object, properties) {
   return object;
 };
 
-var Subscription = (function () {
-  function Subscription(subscriptions, params, mixin) {
-    _classCallCheck(this, Subscription);
-
+class Subscription {
+  constructor(subscriptions, params, mixin) {
     this.subscriptions = subscriptions;
     if (params == null) {
       params = {};
@@ -81,33 +69,25 @@ var Subscription = (function () {
     this.subscriptions.add(this);
   }
 
-  _createClass(Subscription, [{
-    key: "perform",
-    value: function perform(action, data) {
-      if (data == null) {
-        data = {};
-      }
-      data.action = action;
-      return this.send(data);
+  perform(action, data) {
+    if (data == null) {
+      data = {};
     }
-  }, {
-    key: "send",
-    value: function send(data) {
-      return this.consumer.send({
-        command: "message",
-        identifier: this.identifier,
-        data: JSON.stringify(data)
-      });
-    }
-  }, {
-    key: "unsubscribe",
-    value: function unsubscribe() {
-      return this.subscriptions.remove(this);
-    }
-  }]);
+    data.action = action;
+    return this.send(data);
+  }
 
-  return Subscription;
-})();
+  send(data) {
+    return this.consumer.send({
+      command: "message",
+      identifier: this.identifier,
+      data: JSON.stringify(data)
+    });
+  }
 
-exports["default"] = Subscription;
-module.exports = exports["default"];
+  unsubscribe() {
+    return this.subscriptions.remove(this);
+  }
+}
+
+export default Subscription;
