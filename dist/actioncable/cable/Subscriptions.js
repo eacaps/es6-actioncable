@@ -66,6 +66,19 @@ var Subscriptions = function () {
       }
     }
   }, {
+    key: 'removeAll',
+    value: function removeAll() {
+      var i, len, ref, results, subscription;
+      ref = this.subscriptions;
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        subscription = ref[i];
+        results.push(this.sendCommand(subscription, "unsubscribe"));
+      }
+      this.subscriptions = [];
+      return true;
+    }
+  }, {
     key: 'reject',
     value: function reject(identifier) {
       var i, len, ref, results, subscription;
