@@ -18,6 +18,7 @@ export default {
     return new Consumer(CreateWebSocketURL(url), options);
   },
   endConsumer: (consumer) => {
+    consumer.subscriptions.removeAll();
     consumer.connection.close();
     consumer.connection.disconnect();
     consumer.connectionMonitor.stop();
