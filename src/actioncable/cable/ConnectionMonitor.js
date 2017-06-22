@@ -55,13 +55,13 @@ class ConnectionMonitor {
     delete this.stoppedAt;
     this.startedAt = now();
     this.poll();
-    document.addEventListener("visibilitychange", this.visibilityDidChange);
+    document && document.addEventListener("visibilitychange", this.visibilityDidChange);
     return ActionCable.log("ConnectionMonitor started, pollInterval is " + (this.getInterval()) + "ms");
   }
 
   stop() {
     this.stoppedAt = now();
-    document.removeEventListener("visibilitychange", this.visibilityDidChange);
+    document && document.removeEventListener("visibilitychange", this.visibilityDidChange);
     return ActionCable.log("ConnectionMonitor stopped");
   }
 
