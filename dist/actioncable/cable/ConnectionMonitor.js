@@ -76,14 +76,14 @@ var ConnectionMonitor = function () {
       delete this.stoppedAt;
       this.startedAt = now();
       this.poll();
-      document.addEventListener("visibilitychange", this.visibilityDidChange);
+      document && document.addEventListener("visibilitychange", this.visibilityDidChange);
       return _Logger2.default.log("ConnectionMonitor started, pollInterval is " + this.getInterval() + "ms");
     }
   }, {
     key: "stop",
     value: function stop() {
       this.stoppedAt = now();
-      document.removeEventListener("visibilitychange", this.visibilityDidChange);
+      document && document.removeEventListener("visibilitychange", this.visibilityDidChange);
       return _Logger2.default.log("ConnectionMonitor stopped");
     }
   }, {
