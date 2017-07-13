@@ -1,6 +1,6 @@
 {
   "name": "es6-actioncable",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "Port of rails actioncable coffeescript to es6",
   "main": "index.js",
   "scripts": {
