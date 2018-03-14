@@ -2,15 +2,16 @@ let Debugging = null;
 
 export default {
   startDebugging: () => {
-    return Debugging = true;
+    Debugging = true;
   },
   stopDebugging: () => {
-    return Debugging = null;
+    Debugging = null;
   },
   log: (...messages) => {
     if (Debugging) {
       messages.push(Date.now());
-      return console.log("[ActionCable]", ...messages);
+      return console.log('[ActionCable]', ...messages); // eslint-disable-line no-console
     }
-  }
+    return true;
+  },
 };
