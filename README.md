@@ -1,4 +1,4 @@
-git st# es6-actioncable
+# es6-actioncable
 This module is a port of the rails/actioncable coffeescript code to ES6 and nodized it. For more info on actioncable, check out their github page - https://github.com/rails/actioncable.
 
 ## Usage
