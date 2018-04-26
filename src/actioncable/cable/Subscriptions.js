@@ -1,5 +1,6 @@
 /*
-# Collection class for creating (and internally managing) channel subscriptions. The only method intended to be triggered by the user
+# Collection class for creating (and internally managing) channel subscriptions.
+The only method intended to be triggered by the user
 # us Cable.Subscriptions#create, and it should be called through the consumer like so:
 #
 #   @App = {}
@@ -9,9 +10,8 @@
 # For more details on how you'd configure an actual channel subscription, see Cable.Subscription.
 */
 import Subscription from './Subscription';
-import Cable from '../Cable';
 
-var slice = [].slice;
+const slice = [].slice;
 
 class Subscriptions {
   constructor(consumer) {
@@ -20,46 +20,49 @@ class Subscriptions {
   }
 
   create(channelName, mixin) {
-    var channel, params;
-    channel = channelName;
-    params = typeof channel === "object" ? channel : {
-      channel: channel
+    const channel = channelName;
+    const params = typeof channel === 'object' ? channel : {
+      channel,
     };
     return new Subscription(this, params, mixin);
   }
 
   add(subscription) {
     this.subscriptions.push(subscription);
-    this.notify(subscription, "initialized");
-    return this.sendCommand(subscription, "subscribe");
+    this.notify(subscription, 'initialized');
+    return this.sendCommand(subscription, 'subscribe');
   }
 
   remove(subscription) {
     this.forget(subscription);
     if (!this.findAll(subscription.identifier).length) {
-      return this.sendCommand(subscription, "unsubscribe");
+      return this.sendCommand(subscription, 'unsubscribe');
     }
+    return true;
   }
 
   reject(identifier) {
-    var i, len, ref, results, subscription;
-    ref = this.findAll(identifier);
-    results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
+    let i = 0;
+    let len;
+    let subscription;
+    const ref = this.findAll(identifier);
+    const results = [];
+    for (len = ref.length; i < len; i += 1) {
       subscription = ref[i];
       this.forget(subscription);
-      results.push(this.notify(subscription, "rejected"));
+      results.push(this.notify(subscription, 'rejected'));
     }
     return results;
   }
 
   forget(subscription) {
-    var s;
-    return this.subscriptions = (function() {
-      var i, len, ref, results;
-      ref = this.subscriptions;
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
+    let s;
+    this.subscriptions = (() => {
+      let i;
+      let len;
+      const ref = this.subscriptions;
+      const results = [];
+      for (i = 0, len = ref.length; i < len; i += 1) {
         s = ref[i];
         if (s !== subscription) {
           results.push(s);
@@ -70,21 +73,25 @@ class Subscriptions {
   }
 
   reload() {
-    var i, len, ref, results, subscription;
-    ref = this.subscriptions;
-    results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
+    let i;
+    let len;
+    let subscription;
+    const ref = this.subscriptions;
+    const results = [];
+    for (i = 0, len = ref.length; i < len; i += 1) {
       subscription = ref[i];
-      results.push(this.sendCommand(subscription, "subscribe"));
+      results.push(this.sendCommand(subscription, 'subscribe'));
     }
     return results;
   }
 
   findAll(identifier) {
-    var i, len, ref, results, s;
-    ref = this.subscriptions;
-    results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
+    let i;
+    let len;
+    let s;
+    const ref = this.subscriptions;
+    const results = [];
+    for (i = 0, len = ref.length; i < len; i += 1) {
       s = ref[i];
       if (s.identifier === identifier) {
         results.push(s);
@@ -93,48 +100,63 @@ class Subscriptions {
     return results;
   }
 
-  notifyAll() {
-    var args, callbackName, i, len, ref, results, subscription;
-    callbackName = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-    ref = this.subscriptions;
-    results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
+  notifyAll(...args) {
+    let i;
+    let len;
+    let subscription;
+    const callbackName = args[0];
+    const formattedArgs = args.length <= 2 ?
+      slice.call(args, 1) :
+      [];
+    const ref = this.subscriptions;
+    const results = [];
+    for (i = 0, len = ref.length; i < len; i += 1) {
       subscription = ref[i];
-      results.push(this.notify.apply(this, [subscription, callbackName].concat(slice.call(args))));
+      results.push(
+        this.notify(...[subscription, callbackName].concat(slice.call(formattedArgs))));
     }
     return results;
   }
 
-  notify() {
-    var args, callbackName, i, len, results, subscription, subscriptions;
-    subscription = arguments[0], callbackName = arguments[1], args = 3 <= arguments.length ? slice.call(arguments, 2) : [];
-    if (typeof subscription === "string") {
+  notify(...args) {
+    let subscription = args[0];
+    const callbackName = args[1];
+    let i;
+    let len;
+
+    let subscriptions;
+    const formattedArgs = args.length <= 3
+      ? slice.call(args, 2) : [];
+    if (typeof subscription === 'string') {
       subscriptions = this.findAll(subscription);
     } else {
       subscriptions = [subscription];
     }
-    results = [];
-    for (i = 0, len = subscriptions.length; i < len; i++) {
+    const results = [];
+    for (i = 0, len = subscriptions.length; i < len; i += 1) {
       subscription = subscriptions[i];
-      results.push(typeof subscription[callbackName] === "function" ? subscription[callbackName].apply(subscription, args) : void 0);
+      results.push(typeof subscription[callbackName] === 'function' ?
+        subscription[callbackName](...formattedArgs) :
+        0);
     }
     return results;
   }
 
   sendCommand(subscription, command) {
-    var identifier;
-    identifier = subscription.identifier;
+    const identifier = subscription.identifier;
     return this.consumer.send({
-      command: command,
-      identifier: identifier
+      command,
+      identifier,
     });
   }
 
   toJSON() {
-    var i, len, ref, results, subscription;
-    ref = this.subscriptions;
-    results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
+    let i;
+    let len;
+    let subscription;
+    const ref = this.subscriptions;
+    const results = [];
+    for (i = 0, len = ref.length; i < len; i += 1) {
       subscription = ref[i];
       results.push(subscription.identifier);
     }
